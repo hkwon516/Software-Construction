@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 # Optimization level.  Change this -O2 to -Og or -O0 or whatever.
-OPTIMIZE =
+OPTIMIZE = -O0
 
 # The C compiler and its options.
 CC = gcc
@@ -30,24 +30,42 @@ TAREXT = tgz
 
 default: randall
 
-randall: randall.c
-	$(CC) $(CFLAGS) $@.c -o $@
+# randall: randall.c options.c output.c rand64-sw.c rand64-hw.c 
+# 	$(CC) $(CFLAGS) $@.c -o $@
+
+#newly added
+randall : output.o rand64-hw.o rand64-sw.o randall.o options.o
+	gcc -o randall output.o rand64-hw.o rand64-sw.o randall.o options.o
+# till here
+
+check : randall 
+	./check_script
 
 assignment: randall-assignment.$(TAREXT)
 assignment-files = COPYING Makefile randall.c
 randall-assignment.$(TAREXT): $(assignment-files)
 	$(TAR) $(TARFLAGS) -cf $@ $(assignment-files)
 
-submission-tarball: randall-submission.$(TAREXT)
-submission-files = $(assignment-files) \
-  notes.txt # More files should be listed here, as needed.
-randall-submission.$(TAREXT): $(submission-files)
-	$(TAR) $(TARFLAGS) -cf $@ $(submission-files)
+# submission: randall-submission.$(TAREXT)
+# submission-files = $(assignment-files) \
+#   notes.txt test.sh options.c options.h output.c output.h rand64-sw.c rand64-sw.h rand64-hw.c rand64-hw.h # More files should be listed here, as needed.
+# randall-submission.$(TAREXT): $(submission-files)
+
+
+
+# 	$(TAR) $(TARFLAGS) -cf $@ $(submission-files)
+
+myfiles = notes.txt options.c options.h output.c output.h rand64-sw.c rand64-sw.h rand64-hw.c rand64-hw.h Makefile randall.c 
+submission-tarball: $(myfiles)
+	tar -czf randall-submission.tgz randall
 
 repository-tarball:
 	$(TAR) -czf randall-git.tgz .git
 
-.PHONY: default clean assignment submission-tarball repository-tarball
+.PHONY: default clean assignment submission-tarball 
 
 clean:
 	rm -f *.o *.$(TAREXT) randall
+
+# check: randall sanity_check.sh
+# 	./sanity_check

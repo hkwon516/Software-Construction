@@ -1,0 +1,165 @@
+#!/usr/bin/bash
+#Usage information
+#Run this script on one of the approved SEAS servers (lnxsrv11, 12, 13, or 15) and using the correct gcc in /usr/local/cs/bin
+#Place this script + the randall-submission.tgz file in the same empty directory
+#Then run with: ./sanity_check.sh
+
+################################
+#Setup
+GREEN=$(tput setaf 2)
+RED=$(tput setaf 1)
+NOCOLOR=$(tput sgr0)
+CWD=$(pwd)
+INPUTFILE=${CWD}/inputFile.txt
+echo "1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz" > ${INPUTFILE}
+echo "1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz" >> ${INPUTFILE}
+
+################################
+#Check that Script is running in a same environment as grading
+echo "--------------"
+host=$(hostname)
+echo "TEST: Is this sanity check running on lnxsrv11, 12, 13, or 15:"
+if [ $host == "lnxsrv11.seas.ucla.edu" ] || [ $host == "lnxsrv12.seas.ucla.edu" ] || [ $host == "lnxsrv13.seas.ucla.edu" ] || [ $host == "lnxsrv15.seas.ucla.edu" ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL and exiting${NOCOLOR}"
+    exit 1
+fi
+
+gccPath=$(which gcc)
+echo "TEST: Is the PATH variable set correctly to use gcc located at /usr/local/cs/bin/gcc:"
+if [ "$gccPath" == "/usr/local/cs/bin/gcc" ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL and exiting${NOCOLOR}"
+    exit 1
+fi
+
+################################
+#Check that submission can be extracted and read
+echo "--------------"
+echo "TEST: Is the randall-submission.tgz file present:"
+if [ -f "randall-submission.tgz" ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL and exiting${NOCOLOR}"
+    exit 1
+fi
+
+echo "TEST: Able to extract randall-submission.tgz into randall directory"
+tar -xzf randall-submission.tgz
+if [ $? = 0 ] && [ -d randall ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL and exiting${NOCOLOR}"
+    exit 1
+fi
+
+cd randall
+################################
+#Use student made Makefile, to compile
+echo "--------------"
+echo "TEST: Can we compile the randall executable, with command 'make randall'"
+echo "Compiler warnings are ok"
+make randall > /dev/null
+if [ $? -eq 0 ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+################################
+#Use student made Makefile, to check
+echo "--------------"
+echo "TEST: Can we use student tests via 'make check'"
+make check
+if [ $? -eq 0 ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+echo "TEST: Does './randall 1000' seem to generate random results"
+check="./randall 1000"
+run1=$($check | tr '\0' '\n') #transform null bytes to avoid bash warning on string handling
+run2=$($check | tr '\0' '\n') #transform null bytes to avoid bash warning on string handling
+run3=$($check | tr '\0' '\n') #transform null bytes to avoid bash warning on string handling
+if [ "$run1" != "$run2" ] && [ "$run1" != "$run3" ] && [ "$run2" != "$run3" ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+################################
+#Verifying randall -o N option
+echo "--------------"
+echo "TEST: Does './randall -o N 50' output the correct number of bytes"
+check="./randall -o 15 50"
+wc=$( $check | wc -c )
+echo "${wc}"
+
+if [ $wc -eq 50 ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+echo "TEST: Does './randall -o N 50' write in chunks of N"
+check="./randall -o 15 50"
+out=$(strace ./randall -o 15 50 2>&1 | grep --text write | grep --text 15 )
+if [[ -n $out ]];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+################################
+#Verifying randall -i /File option
+echo "--------------"
+echo "TEST: Does './randall -i /File 50' output the correct number of bytes"
+echo "NOTE: Reading from ${INPUTFILE}"
+check="./randall -i ${INPUTFILE} 50"
+wc=$( $check | wc -c )
+echo "HELLOO ${wc}"
+echo "OUTPUT ${check}"
+if [ $wc -eq 50 ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+################################
+#Verifying randall -i rdrand option
+echo "--------------"
+echo "TEST: Does './randall -i rdrand 50' output the correct number of bytes"
+check="./randall -i rdrand 50"
+wc=$( $check | wc -c )
+if [ $wc -eq 50 ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi
+
+################################
+#Verifying randall -i mrand48_r option
+echo "--------------"
+echo "TEST: Does './randall -i mrand48_r 50' output the correct number of bytes"
+check="./randall -i mrand48_r 50"
+wc=$( $check | wc -c )
+if [ $wc -eq 50 ];
+then
+    echo "${GREEN}SUCCESS${NOCOLOR}"
+else
+    echo "${RED}FAIL${NOCOLOR}"
+fi

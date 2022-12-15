@@ -1,0 +1,51 @@
+Make Check
+I started by adding a test script named check_script. I had a 
+simple test case which returns true if the 5 
+generated random number matches the 5 words. Used wc -c to check.
+
+After I splitted the given Randall File 
+Options : 
+To implement the options, I created a function named read_options and
+Made a struct opts to access the data more easily. 
+I used a switch statement to get users’ input of either calling -I or -o. 
+
+Outputs : 
+In the output file, I added a function called writebyteschunks
+which handles the cases of -o N. I made a dynamically allocated memory lines 
+and I copied the long long bits into the memory using memcpy.
+And then I used the write function to write out the allocated memory array. 
+
+Hardware / Software
+I copied all the hardware and the software  implementation from randall.c file
+and moved into rand64-hw.c. I added one function named software_rand64_file_init
+into the Software file which accepts inputs of a file.
+
+
+When I rand command : 
+time dd if=/dev/urandom ibs=8192 obs=8192 count=16384 >/dev/null
+16384+0 records in
+16384+0 records out
+
+134217728 bytes (134 MB, 128 MiB) copied, 0.912994 s, 147 MB/s
+
+real	0m0.917s
+user	0m0.010s
+sys	0m0.901s
+
+When I rand command : 
+time ./randall 133562368 >/dev/null
+real	0m3.880s
+user	0m3.843s
+sys	0m0.013s
+
+When I rand command : 
+time ./randall 133562368 | cat >/dev/null
+real	0m4.000s
+user	0m3.876s
+sys	0m0.255s
+
+When I rand command : 
+time ./randall 133562368 >rand.data
+real	0m5.307s
+user	0m3.805s
+sys	0m0.106s
