@@ -22,12 +22,9 @@ software_rand64_init (void)
 }
 
 void software_rand64_file_init(char *f){
-    // printf("%s", f);
     urandstream = fopen(f, "r");
     
     if (urandstream == NULL){
-        // perror("Hannah");
-        // fflush(stderr);
         abort();}
     
 }
