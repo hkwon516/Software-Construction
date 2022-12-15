@@ -53,9 +53,6 @@ main (int argc, char **argv)
   unsigned long long (*rand64) (void);
   void (*finalize) (void);
 
-  //variables for MRAND48_R
-  // struct drand48_data *buffer;
-  // long int *result;
   if (opts.input == RDRAND && rdrand_supported()){
     initialize = hardware_rand64_init;
     initialize();
@@ -85,21 +82,6 @@ main (int argc, char **argv)
     finalize = hardware_rand64_fini;
   }
 
-  
-// if (rdrand_supported ())
-//     {
-//       initialize = hardware_rand64_init;
-//       rand64 = hardware_rand64;
-//       finalize = hardware_rand64_fini;
-//     }
-//   else
-//     {
-//       initialize = software_rand64_init;
-//       rand64 = software_rand64;
-//       finalize = software_rand64_fini;
-//     }
-
-  // initialize ();
   int wordsize = sizeof rand64 ();
   int output_errno = 0;
 
@@ -141,70 +123,3 @@ main (int argc, char **argv)
   finalize ();
   return !!output_errno;
 }
-
-    // for (int i = 0; i < ; i++){
-    //   rand64 = software_rand64;
-    //   buffer[i] = rand64();
-    // }
-    // mrand48_r(buffer, result); //outputs N bytes of random data
-    // finalize = software_rand64_fini;
-
-
-  // int wordBlockSize = (opts.block_size) / wordsize;
-  // int buffer_size = (sizeof rand64())*(wordBlockSize);
-  // char *lines = (char *)malloc((size_t)buffer_size);
-  // int *buffer = (int*) lines;
-  // int numOfWordsInEachLine;
-  // int totalWrittenWords;
-
-
-// do {
-    //   for (int i = 0; i < wordBlockSize; i++){
-    //     buffer[i] = rand64();
-    //   }
-    //   if (numOfWordsInEachLine > wordBlockSize){
-    //     numOfWordsInEachLine = wordBlockSize;
-    //   }
-    //   else{
-    //     numOfWordsInEachLine = opts.nbytes;
-    //   }
-
-    //   write(1, lines, numOfWordsInEachLine);
-
-    //   totalWrittenWords += numOfWordsInEachLine;
-
-    // }
-    // while(totalWrittenWords < opts.nbytes);
-
-
-        // do
-    // {
-    //   unsigned long long x = rand64 ();
-    //   int outbytes = opts.nbytes < wordsize ? opts.nbytes : wordsize;
-    //   int chunksize = opts.block_size;
-    //   if (!writebyteschunks (x, outbytes, chunksize))
-    //   {
-    //     output_errno = errno;
-    //     break;
-    //   }
-    //   opts.nbytes -= outbytes;
-    // }
-    // while (0 < opts.nbytes);
-
-    // printf("Number1 = %d", N);
-    // do{
-    //   printf("Number0 = %d", N);
-    //   unsigned long long x = rand64 ();
-    //   int outbytes = opts.nbytes < wordsize ? opts.nbytes : wordsize;
-    //   int chunksz = opts.nbytes < opts.block_size ? opts.block_size : opts.nbytes ;
-    //   printf("Number2 = %d", N);
-    //   if (!writebyteschunks (x, outbytes, chunksz))
-    //   {
-    //     output_errno = errno;
-    //     break;
-    //   }
-    //   printf("Number4 = %d", N);
-    //   opts.nbytes -= chunksz;
-    //   printf("Number3 = %d", N);
-    // }
-    // while (0 < opts.nbytes);
